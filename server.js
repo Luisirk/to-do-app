@@ -10,12 +10,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Conectar a MongoDB
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("🔥 Conectado a MongoDB Atlas"))
   .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 
-// Usar las rutas de tareas
+// Using task routes
 app.use("/api", taskRoutes);
 
 const PORT = process.env.PORT || 5000;
