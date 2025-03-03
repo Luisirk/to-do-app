@@ -1,50 +1,41 @@
 import { useState, useEffect } from "react";
-
-const API_URL = "http://localhost:5000/tasks"; // Ruta del backend
+import axios from "axios";
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
 
-  // Cargar tareas desde el backend
+  // Obtener tareas desde el backend
   useEffect(() => {
     fetchTasks();
   }, []);
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch(API_URL);
-      const data = await response.json();
-      setTasks(data);
+      const response = await axios.get("http://localhost:5000/tasks");
+      setTasks(response.data);
     } catch (error) {
       console.error("Error al obtener tareas:", error);
     }
   };
 
+  // Crear nueva tarea
   const createTask = async () => {
-    if (!newTask.trim()) return; // Evitar tareas vacías
-
+    if (!newTask.trim()) return;
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTask }),
-      });
-
-      if (!response.ok) throw new Error("Error al crear tarea");
-
-      const createdTask = await response.json();
-      setTasks([...tasks, createdTask]); // Actualizar estado
-      setNewTask(""); // Limpiar input
+      const response = await axios.post("http://localhost:5000/tasks", { title: newTask });
+      setTasks([...tasks, response.data]);
+      setNewTask("");
     } catch (error) {
-      console.error(error);
+      console.error("Error al crear tarea:", error);
     }
   };
 
+  // Eliminar tarea
   const deleteTask = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      setTasks(tasks.filter((task) => task._id !== id)); // Actualizar estado
+      await axios.delete(`http://localhost:5000/tasks/${id}`);
+      setTasks(tasks.filter(task => task._id !== id));
     } catch (error) {
       console.error("Error al eliminar tarea:", error);
     }
@@ -52,18 +43,23 @@ function App() {
 
   return (
     <div>
-      <h1>To-Do App</h1>
-      <input
-        type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
-        placeholder="Nueva tarea"
+      <h1>Lista de Tareas</h1>
+
+      {/* Input para agregar tareas */}
+      <input 
+        type="text" 
+        value={newTask} 
+        onChange={(e) => setNewTask(e.target.value)} 
+        placeholder="Nueva tarea" 
       />
       <button onClick={createTask}>Agregar</button>
+
+      {/* Lista de tareas */}
       <ul>
-        {tasks.map((task) => (
+        {tasks.map(task => (
           <li key={task._id}>
-            {task.title} <button onClick={() => deleteTask(task._id)}>❌</button>
+            {task.title}
+            <button onClick={() => deleteTask(task._id)}>❌</button>
           </li>
         ))}
       </ul>
