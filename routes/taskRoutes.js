@@ -1,6 +1,6 @@
 const express = require('express');
 const Task = require('../models/Task'); // Importamos el modelo
-const Task = require("../models/Task");
+
 
 const router = express.Router();
 
@@ -51,3 +51,22 @@ return (
     {children}
   </TaskContext.Provider>
 );
+// Editar una tarea por ID
+router.put("/tasks/:id", async (req, res) => {
+  try {
+    const { title } = req.body;
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      { title },
+      { new: true } // Devolver la tarea actualizada
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ error: "Tarea no encontrada" });
+    }
+
+    res.json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar la tarea" });
+  }
+});
